@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Wallet.Api.Extensions;
 using Wallet.Core.DomainEntities;
 using Wallet.Core.Dto.Requests;
-using Wallet.Core.Dto.Responses;
 using Wallet.Core.Dto.ViewModels;
 using Wallet.Data.Abstract;
 
@@ -43,8 +42,8 @@ namespace Wallet.Api.Controllers
 
             int currentPage = page;
             int currentPageSize = pageSize;
-            var totalCourses = await _repository.Count();
-            var totalPages = (int)Math.Ceiling((double)totalCourses / pageSize);
+            var total = await _repository.Count();
+            var totalPages = (int)Math.Ceiling((double)total / pageSize);
 
             IEnumerable<AccountType> result = _repository
                 .AllIncluding(c => c.CustomerAccounts)
@@ -53,7 +52,7 @@ namespace Wallet.Api.Controllers
                 .Take(currentPageSize)
                 .ToList();
 
-            Response.AddPagination(page, pageSize, totalCourses, totalPages);
+            Response.AddPagination(page, pageSize, total, totalPages);
             IEnumerable<AccountTypeViewModel> vm = Mapper.Map<IEnumerable<AccountType>, IEnumerable<AccountTypeViewModel>>(result);
             return new OkObjectResult(vm);
         }
@@ -70,6 +69,20 @@ namespace Wallet.Api.Controllers
             {
                 AccountTypeViewModel vm = Mapper.Map<AccountType, AccountTypeViewModel>(result);
 
+                return new OkObjectResult(vm);
+            }
+            else
+                return NotFound();
+        }
+
+        [HttpGet("search/{term}", Name = "SearchAccountType")]
+        public IActionResult Search(string term)
+        {
+            var result = _repository.FindBy(x => x.Type.StartsWith(term));
+
+            if (result != null)
+            {
+                IEnumerable<AccountTypeViewModel> vm = Mapper.Map<IEnumerable<AccountType>, IEnumerable<AccountTypeViewModel>>(result);
                 return new OkObjectResult(vm);
             }
             else
@@ -101,7 +114,7 @@ namespace Wallet.Api.Controllers
             await _repository.Add(accountType);
             await _repository.CommitAsync();
 
-            AccountTypeCreateResponse response = Mapper.Map<AccountType, AccountTypeCreateResponse>(accountType);
+            AccountTypeViewModel response = Mapper.Map<AccountType, AccountTypeViewModel>(accountType);
 
             return CreatedAtRoute("GetAccountType", new { controller = "AccountTypes", id = accountType.Id }, response);
         }

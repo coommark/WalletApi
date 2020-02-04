@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Wallet.Core.Validationss;
 
-namespace Wallet.Core.Dto.ViewModels
+namespace Wallet.Core.Dto.Requests
 {
-    public class LoginViewModel : IValidatableObject
+    public class LoginRequest : IValidatableObject
     {       
         public string Email { get; set; }      
         public string Password { get; set; }

@@ -15,13 +15,21 @@ namespace Wallet.Data
         public DbSet<AccountType> AccountTypes { get; set; }
         public DbSet<CustomerAccount> CustomerAccounts { get; set; }
         public DbSet<CustomerTransaction> CustomerTransactions { get; set; }
-        
+        public DbSet<CustomerAccountStatus> CustomerAccountStatuses { get; set; }
+        public DbSet<CustomerTransactionBatch> CustomerTransactionBatches { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<MessageThread> MessageThreads { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AccountType>().ToTable("AccountType");                
             modelBuilder.Entity<CustomerAccount>().ToTable("CustomerAccount");
             modelBuilder.Entity<CustomerTransaction>().ToTable("CustomerTransaction");
+            modelBuilder.Entity<CustomerAccountStatus>().ToTable("CustomerAccountStatus");
+            modelBuilder.Entity<CustomerTransactionBatch>().ToTable("CustomerTransactionBatch");
+            modelBuilder.Entity<Message>().ToTable("Message");
+            modelBuilder.Entity<MessageThread>().ToTable("MessageThread");
             base.OnModelCreating(modelBuilder);
         }
     }

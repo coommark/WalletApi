@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Wallet.Core;
+using Wallet.Core.Dto.Requests;
 using Wallet.Core.Dto.ViewModels;
 using Wallet.Core.Membership;
 
@@ -40,7 +41,7 @@ namespace Wallet.Api.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody]RegistrationViewModel model)
+        public async Task<IActionResult> Register([FromBody]UserRegistrationRequest model)
         {
             if (!ModelState.IsValid)
             {

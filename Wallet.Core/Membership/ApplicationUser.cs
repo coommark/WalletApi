@@ -13,7 +13,7 @@ namespace Wallet.Core.Membership
 
         public string FullName
         {
-            get { return LastName + " " + LastName; }
+            get { return FirstName + " " + LastName; }
         }
     }
 }

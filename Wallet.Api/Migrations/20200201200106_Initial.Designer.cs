@@ -11,7 +11,7 @@ using Wallet.Data;
 namespace Wallet.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200128171154_Initial")]
+    [Migration("20200201200106_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -278,6 +278,8 @@ namespace Wallet.Api.Migrations
 
                     b.Property<int>("CreatedBy");
 
+                    b.Property<int>("CurrentStatusId");
+
                     b.Property<decimal>("DailyTransactionLimit")
                         .HasColumnType("decimal(18,2)");
 
@@ -306,9 +308,9 @@ namespace Wallet.Api.Migrations
 
                     b.Property<int>("CreatedBy");
 
-                    b.Property<bool>("CurrentStatus");
-
                     b.Property<int>("CustomerAccountId");
+
+                    b.Property<bool>("IsCurrentStatus");
 
                     b.Property<DateTime>("Modified");
 
@@ -335,6 +337,8 @@ namespace Wallet.Api.Migrations
                     b.Property<decimal>("Credit")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("CustomerAccountId");
+
                     b.Property<int>("CustomerTransactionBatchId");
 
                     b.Property<decimal>("Debit")
@@ -350,7 +354,7 @@ namespace Wallet.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerTransactionBatchId");
+                    b.HasIndex("CustomerAccountId");
 
                     b.ToTable("CustomerTransaction");
                 });
@@ -360,15 +364,58 @@ namespace Wallet.Api.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int>("ApplicationUserId");
+
                     b.Property<DateTime>("Created");
 
-                    b.Property<int>("CustomerAccountId");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerAccountId");
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("CustomerTransactionBatch");
+                });
+
+            modelBuilder.Entity("Wallet.Core.DomainEntities.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Body")
+                        .IsRequired();
+
+                    b.Property<DateTime>("Created");
+
+                    b.Property<int>("MessageThreadId");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageThreadId");
+
+                    b.ToTable("Message");
+                });
+
+            modelBuilder.Entity("Wallet.Core.DomainEntities.MessageThread", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("ApplicationUserId");
+
+                    b.Property<DateTime>("Created");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("MessageThread");
                 });
 
             modelBuilder.Entity("Wallet.Core.Membership.ApplicationRole", b =>
@@ -544,17 +591,33 @@ namespace Wallet.Api.Migrations
 
             modelBuilder.Entity("Wallet.Core.DomainEntities.CustomerTransaction", b =>
                 {
-                    b.HasOne("Wallet.Core.DomainEntities.CustomerTransactionBatch", "CustomerTransactionBatch")
-                        .WithMany("CustomerTransaction")
-                        .HasForeignKey("CustomerTransactionBatchId")
+                    b.HasOne("Wallet.Core.DomainEntities.CustomerAccount", "CustomerAccount")
+                        .WithMany("CustomerTransactions")
+                        .HasForeignKey("CustomerAccountId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Wallet.Core.DomainEntities.CustomerTransactionBatch", b =>
                 {
-                    b.HasOne("Wallet.Core.DomainEntities.CustomerAccount", "CustomerAccount")
-                        .WithMany("CustomerTransactionBatches")
-                        .HasForeignKey("CustomerAccountId")
+                    b.HasOne("Wallet.Core.Membership.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Wallet.Core.DomainEntities.Message", b =>
+                {
+                    b.HasOne("Wallet.Core.DomainEntities.MessageThread", "MessageThread")
+                        .WithMany("Messages")
+                        .HasForeignKey("MessageThreadId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Wallet.Core.DomainEntities.MessageThread", b =>
+                {
+                    b.HasOne("Wallet.Core.Membership.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

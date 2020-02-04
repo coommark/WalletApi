@@ -1,14 +1,11 @@
 ﻿using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Wallet.Core.Dto;
+using Wallet.Core.Dto.Requests;
 
 namespace Wallet.Core.Validations
 {
-    public class UserRegistrationDtoValidator : AbstractValidator<UserRegistrationDto>
+    public class UserRegistrationRequestValidator : AbstractValidator<UserRegistrationRequest>
     {
-        public UserRegistrationDtoValidator()
+        public UserRegistrationRequestValidator()
         {
             RuleFor(vm => vm.Email).NotEmpty().WithMessage("Email cannot be empty");
             RuleFor(vm => vm.Password).NotEmpty().WithMessage("Password cannot be empty");

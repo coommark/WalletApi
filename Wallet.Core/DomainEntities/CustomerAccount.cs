@@ -23,7 +23,14 @@ namespace Wallet.Core.DomainEntities
         [Column(TypeName = "decimal(18,2)")]
         public decimal DailyTransactionLimit { get; set; } = 0.0m;
 
-        public List<CustomerTransactionBatch> CustomerTransactionBatches { get; set; }
+        public int CurrentStatusId { get; set; }
+
+
+        public List<CustomerTransaction> CustomerTransactions { get; set; }
+        //public List<CustomerTransactionBatch> CustomerTransactionBatches { get; set; }
         public List<CustomerAccountStatus> CustomerAccountStatuses { get; set; }
+
+        [NotMapped]
+        public decimal Balance { get; set; } = 0.0m;
     }
 }

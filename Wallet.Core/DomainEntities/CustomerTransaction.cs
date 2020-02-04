@@ -23,7 +23,10 @@ namespace Wallet.Core.DomainEntities
         [Column(TypeName = "nvarchar(256)")]
         public string Description { get; set; }
 
+        public int CustomerAccountId { get; set; }
+        public CustomerAccount CustomerAccount { get; set; }
+
         public int CustomerTransactionBatchId { get; set; }
-        public CustomerTransactionBatch CustomerTransactionBatch { get; set; }        
+
     }
 }

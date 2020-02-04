@@ -16,7 +16,7 @@ namespace Wallet.Core.DomainEntities
         [Column(TypeName = "nvarchar(32)")]
         public string Status { get; set; }
 
-        public bool CurrentStatus { get; set; }
+        public bool IsCurrentStatus { get; set; }
 
         [Required]
         public string Comment { get; set; }

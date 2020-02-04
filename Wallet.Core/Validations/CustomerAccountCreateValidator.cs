@@ -11,8 +11,8 @@ namespace Wallet.Core.Validations
     {
         public CustomerAccountCreateValidator()
         {           
-            RuleFor(m => m.ApplicationUserId).GreaterThan(0).WithMessage("Application User Id must be an integer greater than 1.");
-            RuleFor(m => m.AccountTypeId).GreaterThan(0).WithMessage("Application User Id must be an integer greater than 1.");
+            RuleFor(m => m.ApplicationUserId).GreaterThan(0).WithMessage("Application User Id must be an integer greater than 0.");
+            RuleFor(m => m.AccountTypeId).GreaterThan(0).WithMessage("Application User Id must be an integer greater than 0.");
         }
     }
 

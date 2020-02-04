@@ -11,5 +11,6 @@ namespace Wallet.Data.Abstract
     {
         bool CheckTypeExist(string type);
         bool CheckCategoryCodeExist(string code);
+        bool IsAllowDebit(int id);
     }
 }

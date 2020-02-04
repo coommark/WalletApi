@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using Wallet.Core.Validations;
 
-namespace Wallet.Core.Dto
+namespace Wallet.Core.Dto.Requests
 {
-    public class UserRegistrationDto : IValidatableObject
+    public class UserRegistrationRequest : IValidatableObject
     {
         public string Email { get; set; }
         public string Password { get; set; }
@@ -17,7 +17,7 @@ namespace Wallet.Core.Dto
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            var validator = new UserRegistrationDtoValidator();
+            var validator = new UserRegistrationRequestValidator();
             var result = validator.Validate(this);
             return result.Errors.Select(item => new ValidationResult(item.ErrorMessage, new[] { item.PropertyName }));
         }

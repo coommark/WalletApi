@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Wallet.Core.Dto
+namespace Wallet.Core.Dto.ViewModels
 {
     public class ApplicationUserViewModel
     {
+        public int Id { get; set; }
         public string UserName { get; set; }
         public string FirstName { get; set; }
+        public string FullName { get; set; }
         public string LastName { get; set; }
         public DateTime? LockoutEnd { get; set; }
         public string ProfileImage { get; set; }

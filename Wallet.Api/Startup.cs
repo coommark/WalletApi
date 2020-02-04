@@ -136,6 +136,10 @@ namespace Wallet.Api
             // Repositories
             services.AddScoped<IAccountTypeRepository, AccountTypeRepository>();
             services.AddScoped<ICustomerAccountRepository, CustomerAccountRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ICustomerAccountStatusRepository, CustomerAccountStatusRepository>();
+            services.AddScoped<ICustomerTransactionRepository, CustomerTransactionRepository>();
+            services.AddScoped<ICustomerTransactionBatchRepository, CustomerTransactionBatchRepository>();
 
             services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
             services.AddSingleton(Configuration);

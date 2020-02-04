@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
-using Wallet.Core.Dto.ViewModels;
+using Wallet.Core.Dto.Requests;
 
 namespace Wallet.Core.Validationss
 {
-    public class LoginViewModelValidator : AbstractValidator<LoginViewModel>
+    public class LoginViewModelValidator : AbstractValidator<LoginRequest>
     {
         public LoginViewModelValidator()
         {

@@ -226,6 +226,7 @@ namespace Wallet.Api.Migrations
                     ApplicationUserId = table.Column<int>(nullable: false),
                     Created = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<int>(nullable: false),
+                    CurrentStatusId = table.Column<int>(nullable: false),
                     DailyTransactionLimit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Modified = table.Column<DateTime>(nullable: false),
                     ModifiedBy = table.Column<int>(nullable: false)
@@ -241,6 +242,47 @@ namespace Wallet.Api.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_CustomerAccount_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CustomerTransactionBatch",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ApplicationUserId = table.Column<int>(nullable: false),
+                    Created = table.Column<DateTime>(nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(32)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomerTransactionBatch", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CustomerTransactionBatch_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MessageThread",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ApplicationUserId = table.Column<int>(nullable: false),
+                    Created = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MessageThread", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MessageThread_AspNetUsers_ApplicationUserId",
                         column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -279,8 +321,8 @@ namespace Wallet.Api.Migrations
                     Comment = table.Column<string>(nullable: false),
                     Created = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<int>(nullable: false),
-                    CurrentStatus = table.Column<bool>(nullable: false),
                     CustomerAccountId = table.Column<int>(nullable: false),
+                    IsCurrentStatus = table.Column<bool>(nullable: false),
                     Modified = table.Column<DateTime>(nullable: false),
                     ModifiedBy = table.Column<int>(nullable: false),
                     Status = table.Column<string>(type: "nvarchar(32)", nullable: false)
@@ -297,21 +339,48 @@ namespace Wallet.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CustomerTransactionBatch",
+                name: "CustomerTransaction",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Created = table.Column<DateTime>(nullable: false),
-                    CustomerAccountId = table.Column<int>(nullable: false)
+                    Credit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CustomerAccountId = table.Column<int>(nullable: false),
+                    CustomerTransactionBatchId = table.Column<int>(nullable: false),
+                    Debit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", nullable: false),
+                    TransactionType = table.Column<string>(type: "nvarchar(32)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CustomerTransactionBatch", x => x.Id);
+                    table.PrimaryKey("PK_CustomerTransaction", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CustomerTransactionBatch_CustomerAccount_CustomerAccountId",
+                        name: "FK_CustomerTransaction_CustomerAccount_CustomerAccountId",
                         column: x => x.CustomerAccountId,
                         principalTable: "CustomerAccount",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Message",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Body = table.Column<string>(nullable: false),
+                    Created = table.Column<DateTime>(nullable: false),
+                    MessageThreadId = table.Column<int>(nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(32)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Message", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Message_MessageThread_MessageThreadId",
+                        column: x => x.MessageThreadId,
+                        principalTable: "MessageThread",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -345,30 +414,6 @@ namespace Wallet.Api.Migrations
                         name: "FK_OpenIddictTokens_OpenIddictAuthorizations_AuthorizationId",
                         column: x => x.AuthorizationId,
                         principalTable: "OpenIddictAuthorizations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CustomerTransaction",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Created = table.Column<DateTime>(nullable: false),
-                    Credit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CustomerTransactionBatchId = table.Column<int>(nullable: false),
-                    Debit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(256)", nullable: false),
-                    TransactionType = table.Column<string>(type: "nvarchar(32)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CustomerTransaction", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CustomerTransaction_CustomerTransactionBatch_CustomerTransactionBatchId",
-                        column: x => x.CustomerTransactionBatchId,
-                        principalTable: "CustomerTransactionBatch",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -428,14 +473,24 @@ namespace Wallet.Api.Migrations
                 column: "CustomerAccountId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CustomerTransaction_CustomerTransactionBatchId",
+                name: "IX_CustomerTransaction_CustomerAccountId",
                 table: "CustomerTransaction",
-                column: "CustomerTransactionBatchId");
+                column: "CustomerAccountId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CustomerTransactionBatch_CustomerAccountId",
+                name: "IX_CustomerTransactionBatch_ApplicationUserId",
                 table: "CustomerTransactionBatch",
-                column: "CustomerAccountId");
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Message_MessageThreadId",
+                table: "Message",
+                column: "MessageThreadId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MessageThread_ApplicationUserId",
+                table: "MessageThread",
+                column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OpenIddictApplications_ClientId",
@@ -490,6 +545,12 @@ namespace Wallet.Api.Migrations
                 name: "CustomerTransaction");
 
             migrationBuilder.DropTable(
+                name: "CustomerTransactionBatch");
+
+            migrationBuilder.DropTable(
+                name: "Message");
+
+            migrationBuilder.DropTable(
                 name: "OpenIddictScopes");
 
             migrationBuilder.DropTable(
@@ -499,22 +560,22 @@ namespace Wallet.Api.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "CustomerTransactionBatch");
-
-            migrationBuilder.DropTable(
-                name: "OpenIddictAuthorizations");
-
-            migrationBuilder.DropTable(
                 name: "CustomerAccount");
 
             migrationBuilder.DropTable(
-                name: "OpenIddictApplications");
+                name: "MessageThread");
+
+            migrationBuilder.DropTable(
+                name: "OpenIddictAuthorizations");
 
             migrationBuilder.DropTable(
                 name: "AccountType");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "OpenIddictApplications");
         }
     }
 }

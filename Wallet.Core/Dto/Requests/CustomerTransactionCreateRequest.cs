@@ -18,6 +18,7 @@ namespace Wallet.Core.Dto.Requests
         public int CustomerTransactionBatchId { get; set; }
 
         public string SourceAccount { get; set; }
+        public string DestinationAccount { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

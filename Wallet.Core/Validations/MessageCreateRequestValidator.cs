@@ -15,7 +15,6 @@ namespace Wallet.Core.Validations
                 .Must(x => conditions.Contains(x)).WithMessage("Message type must be one of: " + String.Join(", or ", conditions));
             
             RuleFor(m => m.Body).NotEmpty().WithMessage("Body cannot be empty");
-            RuleFor(m => m.MessageThreadId).GreaterThan(0).WithMessage("Message Thread Id must be an integer greater than 1.");
         }
     }
 }

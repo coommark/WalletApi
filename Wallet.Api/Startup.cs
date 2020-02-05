@@ -140,7 +140,8 @@ namespace Wallet.Api
             services.AddScoped<ICustomerAccountStatusRepository, CustomerAccountStatusRepository>();
             services.AddScoped<ICustomerTransactionRepository, CustomerTransactionRepository>();
             services.AddScoped<ICustomerTransactionBatchRepository, CustomerTransactionBatchRepository>();
-
+            services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddScoped<IMessageReplyRepository, MessageReplyRepository>();
             services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
             services.AddSingleton(Configuration);
         }

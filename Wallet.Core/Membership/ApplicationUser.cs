@@ -9,6 +9,7 @@ namespace Wallet.Core.Membership
         public string LastName { get; set; }
         public string ProfileImage { get; set; }
         public bool IsActive { get; set; }
+        public DateTime RegisterDate { get; set; }
         public DateTime LastLogin { get; set; }
 
         public string FullName

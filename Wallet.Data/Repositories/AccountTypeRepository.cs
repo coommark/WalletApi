@@ -29,9 +29,6 @@ namespace Wallet.Data.Repositories
             return _context.AccountTypes.Any(x => x.Type == type);
         }        
 
-        public bool IsAllowDebit(int id)
-        {
-            return _context.AccountTypes.SingleOrDefault(x => x.Id == id).AllowOverdraw;
-        }
+        
     }
 }

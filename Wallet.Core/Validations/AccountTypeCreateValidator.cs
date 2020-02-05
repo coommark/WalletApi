@@ -19,10 +19,7 @@ namespace Wallet.Core.Validations
                 .Length(3).WithMessage("Category code must be three numbers exact.");                
             RuleFor(m => m.Description).NotEmpty().WithMessage("Description cannot be empty");
             RuleFor(m => m.MinimumBalance).GreaterThanOrEqualTo(0).WithMessage("Minimum balance must be 0 or above.");
-            When(x => x.AllowOverdraw, () =>
-            {
-                RuleFor(m => m.MinimumBalance).Equal(0).WithMessage("Minimum balance cannot be set when allow overdraw is true.");
-            });
+            
         }
     }
 }

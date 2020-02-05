@@ -16,6 +16,7 @@ namespace Wallet.Data.Abstract
         CustomerAccount GetAccountByAccountNumber(string accountNumber);
         IEnumerable<CustomerAccount> AllIncludingWithBalance(params Expression<Func<CustomerAccount, object>>[] includeProperties);
         IEnumerable<CustomerAccount> GetCustomerAccounts(int id);
+        CustomerAccount GetSingleWithBalance(int accountId);
     }
 
 }

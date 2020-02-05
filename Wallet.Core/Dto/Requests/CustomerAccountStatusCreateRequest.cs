@@ -11,7 +11,6 @@ namespace Wallet.Core.Dto.Requests
     {
         public int CustomerAccountId { get; set; }
         public string Status { get; set; }
-        public bool IsCurrentStatus { get; set; }
         public string Comment { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

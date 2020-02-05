@@ -62,7 +62,8 @@ namespace Wallet.Api.Controllers
                 UserName = model.Email,
                 Email = model.Email,
                 FirstName = model.FirstName,
-                LastName = model.LastName
+                LastName = model.LastName,
+                RegisterDate = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

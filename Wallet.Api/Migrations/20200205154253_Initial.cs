@@ -15,7 +15,6 @@ namespace Wallet.Api.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    AllowOverdraw = table.Column<bool>(nullable: false),
                     CategoryCode = table.Column<string>(type: "nvarchar(32)", nullable: false),
                     Created = table.Column<DateTime>(nullable: false),
                     CreatedBy = table.Column<int>(nullable: false),
@@ -68,6 +67,7 @@ namespace Wallet.Api.Migrations
                     PhoneNumber = table.Column<string>(nullable: true),
                     PhoneNumberConfirmed = table.Column<bool>(nullable: false),
                     ProfileImage = table.Column<string>(nullable: true),
+                    RegisterDate = table.Column<DateTime>(nullable: false),
                     SecurityStamp = table.Column<string>(nullable: true),
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
                     UserName = table.Column<string>(maxLength: 256, nullable: true)
@@ -270,19 +270,21 @@ namespace Wallet.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MessageThread",
+                name: "Message",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     ApplicationUserId = table.Column<int>(nullable: false),
-                    Created = table.Column<DateTime>(nullable: false)
+                    Body = table.Column<string>(nullable: false),
+                    Created = table.Column<DateTime>(nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(32)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MessageThread", x => x.Id);
+                    table.PrimaryKey("PK_Message", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MessageThread_AspNetUsers_ApplicationUserId",
+                        name: "FK_Message_AspNetUsers_ApplicationUserId",
                         column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -344,6 +346,7 @@ namespace Wallet.Api.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    AuditDescription = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     Created = table.Column<DateTime>(nullable: false),
                     Credit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CustomerAccountId = table.Column<int>(nullable: false),
@@ -364,23 +367,23 @@ namespace Wallet.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Message",
+                name: "MessageReply",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ApplicationUserId = table.Column<int>(nullable: false),
                     Body = table.Column<string>(nullable: false),
                     Created = table.Column<DateTime>(nullable: false),
-                    MessageThreadId = table.Column<int>(nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(32)", nullable: false)
+                    MessageId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Message", x => x.Id);
+                    table.PrimaryKey("PK_MessageReply", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Message_MessageThread_MessageThreadId",
-                        column: x => x.MessageThreadId,
-                        principalTable: "MessageThread",
+                        name: "FK_MessageReply_Message_MessageId",
+                        column: x => x.MessageId,
+                        principalTable: "Message",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -483,14 +486,14 @@ namespace Wallet.Api.Migrations
                 column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Message_MessageThreadId",
+                name: "IX_Message_ApplicationUserId",
                 table: "Message",
-                column: "MessageThreadId");
+                column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MessageThread_ApplicationUserId",
-                table: "MessageThread",
-                column: "ApplicationUserId");
+                name: "IX_MessageReply_MessageId",
+                table: "MessageReply",
+                column: "MessageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OpenIddictApplications_ClientId",
@@ -548,7 +551,7 @@ namespace Wallet.Api.Migrations
                 name: "CustomerTransactionBatch");
 
             migrationBuilder.DropTable(
-                name: "Message");
+                name: "MessageReply");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictScopes");
@@ -563,7 +566,7 @@ namespace Wallet.Api.Migrations
                 name: "CustomerAccount");
 
             migrationBuilder.DropTable(
-                name: "MessageThread");
+                name: "Message");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictAuthorizations");

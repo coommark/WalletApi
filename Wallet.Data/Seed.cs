@@ -46,7 +46,8 @@ namespace Wallet.Data
                     Email = "admin@admin.com",
                     FirstName = "Mark",
                     LastName = "Melton",
-                    SecurityStamp = Guid.NewGuid().ToString()
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    RegisterDate = DateTime.UtcNow
                 };
 
                 var result = await _userManager.CreateAsync(admin, "Password123$");
@@ -72,7 +73,7 @@ namespace Wallet.Data
                 await _userManager.AddToRoleAsync(adminAccount, adminRole.Name);
             }
 
-            //await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
     }
 }

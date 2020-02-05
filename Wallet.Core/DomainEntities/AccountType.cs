@@ -27,8 +27,6 @@ namespace Wallet.Core.DomainEntities
         [Column(TypeName = "decimal(18,2)")]
         public decimal DailyTransactionLimit { get; set; } = 0.0m;
 
-        public bool AllowOverdraw { get; set; }
-
         public List<CustomerAccount> CustomerAccounts { get; set; }
     }
 }

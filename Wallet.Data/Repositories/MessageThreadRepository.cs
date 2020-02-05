@@ -7,11 +7,11 @@ using Wallet.Data.Shared;
 
 namespace Wallet.Data.Repositories
 {
-    public class MessageThreadRepository : Repository<MessageThread>, IMessageThreadRepository
+    public class MessageReplyRepository : Repository<MessageReply>, IMessageReplyRepository
     {
         private ApplicationDbContext _context;
 
-        public MessageThreadRepository(ApplicationDbContext context) : base(context)
+        public MessageReplyRepository(ApplicationDbContext context) : base(context)
         {
             _context = context;
         }

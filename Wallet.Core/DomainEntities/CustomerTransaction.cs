@@ -23,6 +23,9 @@ namespace Wallet.Core.DomainEntities
         [Column(TypeName = "nvarchar(256)")]
         public string Description { get; set; }
 
+        [Column(TypeName = "nvarchar(256)")]
+        public string AuditDescription { get; set; }
+
         public int CustomerAccountId { get; set; }
         public CustomerAccount CustomerAccount { get; set; }
 

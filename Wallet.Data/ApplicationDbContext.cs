@@ -18,7 +18,7 @@ namespace Wallet.Data
         public DbSet<CustomerAccountStatus> CustomerAccountStatuses { get; set; }
         public DbSet<CustomerTransactionBatch> CustomerTransactionBatches { get; set; }
         public DbSet<Message> Messages { get; set; }
-        public DbSet<MessageThread> MessageThreads { get; set; }
+        public DbSet<MessageReply> MessageReplies { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -29,7 +29,7 @@ namespace Wallet.Data
             modelBuilder.Entity<CustomerAccountStatus>().ToTable("CustomerAccountStatus");
             modelBuilder.Entity<CustomerTransactionBatch>().ToTable("CustomerTransactionBatch");
             modelBuilder.Entity<Message>().ToTable("Message");
-            modelBuilder.Entity<MessageThread>().ToTable("MessageThread");
+            modelBuilder.Entity<MessageReply>().ToTable("MessageReply");
             base.OnModelCreating(modelBuilder);
         }
     }

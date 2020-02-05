@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using OpenIddict.Core;
 using Wallet.Core.Membership;
+using Wallet.Data.Repositories;
 
 namespace Wallet.Api.Controllers
 {
@@ -66,6 +67,8 @@ namespace Wallet.Api.Controllers
                 // Create a new authentication ticket.
                 var ticket = await CreateTicketAsync(request, user);
 
+                user.LastLogin = DateTime.UtcNow;
+                await _userManager.UpdateAsync(user);
                 return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
             }
 

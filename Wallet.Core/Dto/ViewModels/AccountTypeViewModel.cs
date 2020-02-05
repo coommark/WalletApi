@@ -11,7 +11,6 @@ namespace Wallet.Core.Dto.ViewModels
         public string Description { get; set; }
         public string CategoryCode { get; set; }
         public decimal MinimumBalance { get; set; }
-        public bool AllowOverdraw { get; set; }
 
         public List<CustomerAccountViewModel> CustomerAccounts { get; set; }
     }

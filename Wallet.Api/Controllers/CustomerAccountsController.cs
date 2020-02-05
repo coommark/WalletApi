@@ -49,8 +49,8 @@ namespace Wallet.Api.Controllers
 
             int currentPage = page;
             int currentPageSize = pageSize;
-            var totalCourses = await _repository.Count();
-            var totalPages = (int)Math.Ceiling((double)totalCourses / pageSize);
+            var totalCount = await _repository.Count();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
             IEnumerable<CustomerAccount> result = _repository
                 .AllIncludingWithBalance(x => x.ApplicationUser, m => m.AccountType)
@@ -59,8 +59,13 @@ namespace Wallet.Api.Controllers
                 .Take(currentPageSize)
                 .ToList();
 
-            Response.AddPagination(page, pageSize, totalCourses, totalPages);
+            Response.AddPagination(page, pageSize, totalCount, totalPages);
             IEnumerable<CustomerAccountViewModel> vm = Mapper.Map<IEnumerable<CustomerAccount>, IEnumerable<CustomerAccountViewModel>>(result);
+            foreach(var account in vm)
+            {
+                var status = _statusRepository.GetSingle(x => x.Id == account.CurrentStatusId);
+                account.AccountStatus = Mapper.Map<CustomerAccountStatus, CustomerAccountStatusViewModel>(status);
+            }
             return new OkObjectResult(vm);
         }
 
@@ -71,11 +76,13 @@ namespace Wallet.Api.Controllers
             if (id == null)
                 return NotFound();
 
-            CustomerAccount result =  _repository.GetSingle(x => x.Id == id);
+            CustomerAccount result =  _repository.GetSingleWithBalance(id.Value);
 
             if (result != null)
             {
                 CustomerAccountViewModel vm = Mapper.Map<CustomerAccount, CustomerAccountViewModel>(result);
+                var status = _statusRepository.GetSingle(x => x.Id == result.CurrentStatusId);
+                vm.AccountStatus = Mapper.Map<CustomerAccountStatus, CustomerAccountStatusViewModel>(status);
 
                 return new OkObjectResult(vm);
             }
@@ -92,6 +99,8 @@ namespace Wallet.Api.Controllers
             if (result != null)
             {
                 CustomerAccountViewModel vm = Mapper.Map<CustomerAccount, CustomerAccountViewModel>(result);
+                var status = _statusRepository.GetSingle(x => x.Id == result.CurrentStatusId);
+                vm.AccountStatus = Mapper.Map<CustomerAccountStatus, CustomerAccountStatusViewModel>(status);
 
                 return new OkObjectResult(vm);
             }
@@ -108,6 +117,11 @@ namespace Wallet.Api.Controllers
             if (result != null)
             {
                 IEnumerable<CustomerAccountViewModel> vm = Mapper.Map<IEnumerable<CustomerAccount>, IEnumerable<CustomerAccountViewModel>>(result);
+                foreach (var account in vm)
+                {
+                    var status = _statusRepository.GetSingle(x => x.Id == account.CurrentStatusId);
+                    account.AccountStatus = Mapper.Map<CustomerAccountStatus, CustomerAccountStatusViewModel>(status);
+                }
                 return new OkObjectResult(vm);
             }
             else
@@ -156,5 +170,28 @@ namespace Wallet.Api.Controllers
 
             return CreatedAtRoute("GetCustomerAccount", new { controller = "CustomerAccounts", id = tocreate.Id }, response);
         }
+
+        [HttpPost("SetDailyLimit", Name = "SetDailyLimit")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> SetDailyLimit([FromBody]CustomerAccountUpdateRequest model)
+        {            
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            CustomerAccount toUpdate = _repository.GetSingle(x => x.Id == model.Id);
+
+            if (toUpdate == null)
+                return NotFound();
+            else
+            {
+                toUpdate.DailyTransactionLimit = model.DailyTransactionLimit;
+                _repository.Update(toUpdate);
+                await _repository.CommitAsync();
+            }
+
+            CustomerAccountViewModel response = Mapper.Map<CustomerAccount, CustomerAccountViewModel>(toUpdate);
+            return CreatedAtRoute("GetCustomerAccount", new { controller = "CustomerAccounts", id = toUpdate.Id }, response);
+        }
+
     }
 }

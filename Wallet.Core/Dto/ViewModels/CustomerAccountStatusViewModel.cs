@@ -10,7 +10,5 @@ namespace Wallet.Core.Dto.ViewModels
         public string Status { get; set; }
         public bool IsCurrentStatus { get; set; }
         public string Comment { get; set; }
-
-        public CustomerAccountViewModel CustomerAccount { get; set; }
     }
 }

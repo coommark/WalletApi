@@ -53,11 +53,15 @@ namespace Wallet.Data.Repositories
         {
             var account = _context.CustomerAccounts.SingleOrDefault(x => x.Id == accountId);
             decimal dailyCatLimit = _context.AccountTypes.SingleOrDefault(x => x.Id == account.AccountTypeId).DailyTransactionLimit;
-            if(account.DailyTransactionLimit != dailyCatLimit)
+            if(account.DailyTransactionLimit >= dailyCatLimit)
             {
                 return account.DailyTransactionLimit;
             }
-            return dailyCatLimit;
+            else
+            {
+                return dailyCatLimit;
+            }
+            
         }
 
         public CustomerAccount GetAccountByAccountNumber(string accountNumber)
@@ -81,6 +85,17 @@ namespace Wallet.Data.Repositories
                 - _context.CustomerTransactions.Where(x => x.CustomerAccountId == item.Id).Sum(x => x.Credit);
             }
             return result;
+        }
+
+        public CustomerAccount GetSingleWithBalance(int accountId)
+        {
+            var account = _context.CustomerAccounts
+                .Include(X => X.ApplicationUser)
+                .SingleOrDefault(x => x.Id == accountId);
+            account.Balance  = _context.CustomerTransactions.Where(x => x.CustomerAccountId == account.Id).Sum(x => x.Debit)
+                - _context.CustomerTransactions.Where(x => x.CustomerAccountId == account.Id).Sum(x => x.Credit);
+
+            return account;
         }
 
         public bool IsSameCustomerAccounts(int accountOneId, int accountTwoId)

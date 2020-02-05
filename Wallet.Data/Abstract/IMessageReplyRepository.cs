@@ -6,7 +6,7 @@ using Wallet.Data.Shared;
 
 namespace Wallet.Data.Abstract
 {
-    public interface IMessageThreadRepository : IRepository<MessageThread>
+    public interface IMessageReplyRepository : IRepository<MessageReply>
     {
     }
 }

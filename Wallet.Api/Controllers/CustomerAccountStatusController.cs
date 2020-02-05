@@ -66,6 +66,11 @@ namespace Wallet.Api.Controllers
             await _repository.Add(toadd);
             await _repository.CommitAsync();
 
+            var customerAccount = _accounRepository.GetSingle(x => x.Id == model.CustomerAccountId);
+            customerAccount.CurrentStatusId = toadd.Id;
+             _accounRepository.Update(customerAccount);
+            await _accounRepository.CommitAsync();
+
             CustomerAccountStatusViewModel response = Mapper.Map<CustomerAccountStatus, CustomerAccountStatusViewModel>(toadd);
 
             return CreatedAtRoute("GetAccountStatus", new { controller = "CustomerAccountStatus", id = toadd.Id }, response);

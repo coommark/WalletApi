@@ -11,7 +11,7 @@ using Wallet.Data;
 namespace Wallet.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200201200106_Initial")]
+    [Migration("20200205154253_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -228,8 +228,6 @@ namespace Wallet.Api.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<bool>("AllowOverdraw");
-
                     b.Property<string>("CategoryCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(32)");
@@ -332,6 +330,9 @@ namespace Wallet.Api.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("AuditDescription")
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<DateTime>("Created");
 
                     b.Property<decimal>("Credit")
@@ -384,12 +385,12 @@ namespace Wallet.Api.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int>("ApplicationUserId");
+
                     b.Property<string>("Body")
                         .IsRequired();
 
                     b.Property<DateTime>("Created");
-
-                    b.Property<int>("MessageThreadId");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -397,25 +398,30 @@ namespace Wallet.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MessageThreadId");
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Message");
                 });
 
-            modelBuilder.Entity("Wallet.Core.DomainEntities.MessageThread", b =>
+            modelBuilder.Entity("Wallet.Core.DomainEntities.MessageReply", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("ApplicationUserId");
 
+                    b.Property<string>("Body")
+                        .IsRequired();
+
                     b.Property<DateTime>("Created");
+
+                    b.Property<int>("MessageId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("MessageId");
 
-                    b.ToTable("MessageThread");
+                    b.ToTable("MessageReply");
                 });
 
             modelBuilder.Entity("Wallet.Core.Membership.ApplicationRole", b =>
@@ -482,6 +488,8 @@ namespace Wallet.Api.Migrations
                     b.Property<bool>("PhoneNumberConfirmed");
 
                     b.Property<string>("ProfileImage");
+
+                    b.Property<DateTime>("RegisterDate");
 
                     b.Property<string>("SecurityStamp");
 
@@ -607,17 +615,17 @@ namespace Wallet.Api.Migrations
 
             modelBuilder.Entity("Wallet.Core.DomainEntities.Message", b =>
                 {
-                    b.HasOne("Wallet.Core.DomainEntities.MessageThread", "MessageThread")
-                        .WithMany("Messages")
-                        .HasForeignKey("MessageThreadId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Wallet.Core.DomainEntities.MessageThread", b =>
-                {
                     b.HasOne("Wallet.Core.Membership.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Wallet.Core.DomainEntities.MessageReply", b =>
+                {
+                    b.HasOne("Wallet.Core.DomainEntities.Message", "Message")
+                        .WithMany("MessageReplies")
+                        .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

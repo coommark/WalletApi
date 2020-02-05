@@ -15,5 +15,6 @@ namespace Wallet.Core.Dto.ViewModels
         public string ProfileImage { get; set; }
         public bool IsActive { get; set; }
         public DateTime LastLogin { get; set; }
+        public DateTime RegisterDate { get; set; }
     }
 }

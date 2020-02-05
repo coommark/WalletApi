@@ -11,7 +11,6 @@ namespace Wallet.Core.Dto.Requests
     {
         public string Type { get; set; }
         public string Body { get; set; }
-        public int MessageThreadId { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

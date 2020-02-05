@@ -8,7 +8,6 @@ namespace Wallet.Core.Dto.ViewModels
     {
         public string Type { get; set; }
         public string Body { get; set; }
-        public int MessageThreadId { get; set; }
-        public MessageThreadViewModel MessageThread { get; set; }
+        public ApplicationUserViewModel ApplicationUser { get; set; }
     }
 }

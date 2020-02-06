@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wallet.Api", "Wallet.Api\Wallet.Api.csproj", "{670824DE-2C52-4234-8A8B-D5FA298C99F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wallet.Api", "Wallet.Api\Wallet.Api.csproj", "{670824DE-2C52-4234-8A8B-D5FA298C99F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wallet.Core", "Wallet.Core\Wallet.Core.csproj", "{C4BDCD48-A05D-4FEB-AA63-44F68AD4491D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wallet.Core", "Wallet.Core\Wallet.Core.csproj", "{C4BDCD48-A05D-4FEB-AA63-44F68AD4491D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wallet.Data", "Wallet.Data\Wallet.Data.csproj", "{A215D8FB-8707-4730-9D35-EC19CAC4345D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wallet.Data", "Wallet.Data\Wallet.Data.csproj", "{A215D8FB-8707-4730-9D35-EC19CAC4345D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

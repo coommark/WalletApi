@@ -16,6 +16,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using Wallet.Api.Mailer;
 using Wallet.Core.Mappings;
 using Wallet.Core.Membership;
 using Wallet.Data;
@@ -54,10 +55,8 @@ namespace Wallet.Api
                 options.Password.RequiredLength = 6;
                 options.User.AllowedUserNameCharacters = null;
 
-                // Confirmation email required for new account
                 options.SignIn.RequireConfirmedEmail = true;
 
-                // Lockout settings
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
                 options.Lockout.MaxFailedAccessAttempts = 5;
             })
@@ -91,22 +90,14 @@ namespace Wallet.Api
             services.AddOpenIddict(options =>
             {
                 options.AddEntityFrameworkCoreStores<ApplicationDbContext>();
-                // Register the ASP.NET Core MVC binder used by OpenIddict.
-                // Note: if you don't call this method, you won't be able to
-                // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
                 options.AddMvcBinders();
-                // Enable the token endpoint.
                 options.EnableTokenEndpoint("/auth/login");
-                // Enable the password flow.
                 options.AllowPasswordFlow();
-                // During development, you can disable the HTTPS requirement.
                 options.DisableHttpsRequirement();
-
                 options.UseJsonWebTokens();
                 options.AddEphemeralSigningKey();
             });
 
-            // Automapper   
             Mapper.Initialize(cfg =>
             {
                 cfg.AddProfile(new DataProfile());
@@ -133,7 +124,6 @@ namespace Wallet.Api
                 });
             });
 
-            // Repositories
             services.AddScoped<IAccountTypeRepository, AccountTypeRepository>();
             services.AddScoped<ICustomerAccountRepository, CustomerAccountRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -143,6 +133,7 @@ namespace Wallet.Api
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<IMessageReplyRepository, MessageReplyRepository>();
             services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
+            services.AddTransient<IEMailer, EMailer>();
             services.AddSingleton(Configuration);
         }
 
@@ -178,8 +169,6 @@ namespace Wallet.Api
               });
 
             app.UseAuthentication();
-            //app.UseMvcWithDefaultRoute();
-            //app.UseWelcomePage();
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUI(c => {

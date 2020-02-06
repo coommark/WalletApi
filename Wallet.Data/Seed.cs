@@ -37,13 +37,13 @@ namespace Wallet.Data
                 await _roleManager.CreateAsync(custRole);
             }
 
-            var existAdminAccount = await _userManager.FindByNameAsync("admin@admin.com");
+            var existAdminAccount = await _userManager.FindByNameAsync("coommark@gmail.com");
             if (existAdminAccount == null)
             {
                 var admin = new ApplicationUser()
                 {
-                    UserName = "admin@admin.com",
-                    Email = "admin@admin.com",
+                    UserName = "coommark@gmail.com",
+                    Email = "coommark@gmail.com",
                     FirstName = "Mark",
                     LastName = "Melton",
                     SecurityStamp = Guid.NewGuid().ToString(),
@@ -67,7 +67,7 @@ namespace Wallet.Data
                 }
             }
 
-            var adminAccount = await _userManager.FindByNameAsync("admin@admin.com");
+            var adminAccount = await _userManager.FindByNameAsync("coommark@gmail.com");
             if (!await _userManager.IsInRoleAsync(adminAccount, adminRole.Name))
             {
                 await _userManager.AddToRoleAsync(adminAccount, adminRole.Name);

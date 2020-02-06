@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wallet.Api.Extensions;
+using Wallet.Api.Mailer;
 using Wallet.Core.DomainEntities;
 using Wallet.Core.Dto.Requests;
 using Wallet.Core.Dto.ViewModels;
@@ -22,18 +23,21 @@ namespace Wallet.Api.Controllers
         private readonly ICustomerAccountStatusRepository _statusRepository;
         private readonly ICustomerTransactionRepository _repository;
         private readonly ICustomerTransactionBatchRepository _batchRepository;
+        private readonly IEMailer _mailer;
         int page = 1;
         int pageSize = 4;
 
 
         public CustomerTransactionsController(ICustomerAccountRepository accountRepository, IAccountTypeRepository typeRepository,
-            ICustomerAccountStatusRepository statusRepository, ICustomerTransactionRepository repository, ICustomerTransactionBatchRepository batchRepository)
+            ICustomerAccountStatusRepository statusRepository, ICustomerTransactionRepository repository, ICustomerTransactionBatchRepository batchRepository,
+            IEMailer mailer)
         {
             _repository = repository;
             _typeRepository = typeRepository;
             _statusRepository = statusRepository;
             _accountRepository = accountRepository;
             _batchRepository = batchRepository;
+            _mailer = mailer;
         }
 
         [HttpPost("CustomerTransfer")]
@@ -48,7 +52,15 @@ namespace Wallet.Api.Controllers
             var destinationAccountFromDb = _accountRepository.GetAccountByAccountNumber(model.DestinationAccount);            
             var sourceAccountCat = _typeRepository.GetSingle(x => x.Id == sourceAccountFromDb.AccountTypeId);
             var status = _statusRepository.GetSingle(x => x.Id == sourceAccountFromDb.CurrentStatusId);
-            if(status.Status != "Active")
+            var destinationStatus = _statusRepository.GetSingle(x => x.Id == destinationAccountFromDb.CurrentStatusId);
+            decimal sourceBalance = _repository.AccountBalance(sourceAccountFromDb.Id);
+            decimal destinationBalance = _repository.AccountBalance(destinationAccountFromDb.Id);
+            if (destinationStatus.Status == "Closed")
+            {
+                ModelState.AddModelError("", String.Format("The destination account {0} is {1}. Transaction declined.", destinationAccountFromDb.AccountNumber, destinationStatus.Status));
+                return BadRequest(ModelState);
+            }
+            if (status.Status != "Active")
             {
                 ModelState.AddModelError("", String.Format("Your account status is currently {0} . Transaction declined.", status.Status));
                 return BadRequest(ModelState);
@@ -58,7 +70,7 @@ namespace Wallet.Api.Controllers
                 decimal dailyTransLimit = _accountRepository.DailyTransactionLimit(sourceAccountFromDb.Id);
                 decimal dailyTransTotal = _repository.DailyTransactionTotal(sourceAccountFromDb.Id);
                 decimal dailyTransBalance = dailyTransLimit - dailyTransTotal;
-                decimal accountBalance = _repository.AccountBalance(sourceAccountFromDb.Id);
+                
                 if (Math.Abs(dailyTransLimit) < Math.Abs(model.Debit))
                 {
                     ModelState.AddModelError("", String.Format("This transaction exceeds your daily limit balance of {0} . Transaction declined.", string.Format("{0:n}", dailyTransLimit)));
@@ -69,9 +81,9 @@ namespace Wallet.Api.Controllers
                     ModelState.AddModelError("", String.Format("This transaction exceeds your daily limit balance of {0} . Transaction declined.", string.Format("{0:n}", dailyTransLimit)));
                     return BadRequest(ModelState);
                 }
-                if (model.Debit > accountBalance)
+                if (model.Debit > sourceBalance)
                 {
-                    ModelState.AddModelError("", String.Format("Your account balance {0} is not sufficient for this transaction. Transaction declined.", string.Format("{0:n}", accountBalance)));
+                    ModelState.AddModelError("", String.Format("Your account balance {0} is not sufficient for this transaction. Transaction declined.", string.Format("{0:n}", sourceBalance)));
                     return BadRequest(ModelState);
                 }                
             }
@@ -115,6 +127,22 @@ namespace Wallet.Api.Controllers
                 await _repository.Add(destinationTransaction);
                 await _repository.CommitAsync();
 
+                //Send Email to Receipient
+                _mailer.SendTransactionNotification(
+                    destinationAccountFromDb.ApplicationUser.Email,
+                    destinationAccountFromDb.ApplicationUser.FullName,
+                    string.Format("{0:n}", model.Debit),
+                    string.Format("{0:n}", model.Debit),
+                    "Credit Alert on your account " + destinationAccountFromDb.AccountType.Type + " " + destinationAccountFromDb.AccountNumber + " from " + sourceAccountFromDb.ApplicationUser.FullName);
+
+                //Send to Source
+                _mailer.SendTransactionNotification(
+                   sourceAccountFromDb.ApplicationUser.Email,
+                   sourceAccountFromDb.ApplicationUser.FullName,
+                   string.Format("{0:n}", model.Debit),
+                   string.Format("{0:n}", (sourceBalance - model.Debit)),
+                   "Debit Alert on your account " + sourceAccountFromDb.AccountType.Type + " " + sourceAccountFromDb.AccountNumber + " to " + destinationAccountFromDb.ApplicationUser.FullName);
+
                 CustomerTransactionViewModel response = Mapper.Map<CustomerTransaction, CustomerTransactionViewModel>(sourceTransaction);
                 return CreatedAtRoute("GetTransaction", new { controller = "CustomerTransactions", id = sourceTransaction.Id }, response);
             }            
@@ -141,7 +169,9 @@ namespace Wallet.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             else
-            {                
+            {
+                decimal sourceBalance = _repository.AccountBalance(adminCurrentAccount.Id);
+                decimal destinationBalance = _repository.AccountBalance(destinationAccountFromDb.Id);
                 var batch = new CustomerTransactionBatch
                 {
                     ApplicationUserId = Convert.ToInt32(User.Identity.Name),
@@ -164,7 +194,7 @@ namespace Wallet.Api.Controllers
                 {
                     TransactionType = "Transfer",
                     Debit = model.Debit,
-                    Description = "Funds transfer from " + adminCurrentAccount.ApplicationUser.FullName,
+                    Description = "Funds transfer from E-Wallet Admin",
                     AuditDescription = model.Description,
                     CustomerAccountId = destinationAccountFromDb.Id,
                     CustomerTransactionBatchId = batch.Id,
@@ -172,6 +202,23 @@ namespace Wallet.Api.Controllers
                 await _repository.Add(sourceTransaction);
                 await _repository.Add(destinationTransaction);
                 await _repository.CommitAsync();
+
+                //Send Email to Receipient
+                _mailer.SendTransactionNotification(
+                    destinationAccountFromDb.ApplicationUser.Email,
+                    destinationAccountFromDb.ApplicationUser.FullName,
+                    string.Format("{0:n}", model.Debit),
+                    string.Format("{0:n}", destinationBalance + model.Debit),
+                    "Credit Alert on your account " + destinationAccountFromDb.AccountType.Type + " " + destinationAccountFromDb.AccountNumber + " from E-Wallet Admin.");
+
+                //Send to Source
+                _mailer.SendTransactionNotification(
+                   adminCurrentAccount.ApplicationUser.Email,
+                   adminCurrentAccount.ApplicationUser.FullName,
+                   string.Format("{0:n}", model.Debit),
+                   string.Format("{0:n}", (sourceBalance - model.Debit)),
+                   "Debit Alert on your account " + adminCurrentAccount.AccountType.Type + " " + adminCurrentAccount.AccountNumber + " to " + destinationAccountFromDb.ApplicationUser.FullName);
+
 
                 CustomerTransactionViewModel response = Mapper.Map<CustomerTransaction, CustomerTransactionViewModel>(sourceTransaction);
                 return CreatedAtRoute("GetTransaction", new { controller = "CustomerTransactions", id = sourceTransaction.Id }, response);
@@ -263,6 +310,73 @@ namespace Wallet.Api.Controllers
                 .ToList();
 
             Response.AddPagination(page, pageSize, totalCount, totalPages);
+            IEnumerable<CustomerTransactionViewModel> vm = Mapper.Map<IEnumerable<CustomerTransaction>, IEnumerable<CustomerTransactionViewModel>>(result);
+            foreach (var item in vm)
+            {
+                item.AccountName = _repository.GetCustomerName(item.CustomerAccount.Id);
+            }
+            return new OkObjectResult(vm);
+        }
+
+        [HttpPost("AccountStatement", Name = "AccountStatement")]
+        public IActionResult AccountStatement([FromBody]StatementRequest model)
+        {
+            var customerAccount = _accountRepository.GetSingle(x => x.Id == Convert.ToInt32(User.Identity.Name));
+            if (customerAccount.ApplicationUserId != Convert.ToInt32(User.Identity.Name))
+            {
+                return new UnauthorizedResult();
+            }
+
+            IEnumerable<CustomerTransaction> result = _repository
+                .AllIncluding(x => x.CustomerAccount)
+                .Where(x => x.CustomerAccount.AccountNumber == model.AccountNumber && x.Created >= model.StartDate && x.Created <= model.EndDate)
+                .OrderBy(c => c.Id)
+                .ToList();
+
+            IEnumerable<CustomerTransactionViewModel> vm = Mapper.Map<IEnumerable<CustomerTransaction>, IEnumerable<CustomerTransactionViewModel>>(result);
+            foreach (var item in vm)
+            {
+                item.AccountName = _repository.GetCustomerName(item.CustomerAccount.Id);
+            }
+            return new OkObjectResult(vm);
+        }
+
+
+        [HttpPost("TransactionsReport", Name = "TransactionsReport")]
+        [Authorize(Roles = "Administrator")]
+        public IActionResult TransactionsReport([FromBody]PeriodicTransactionsRequest model)
+        {
+            var customerAccount = _accountRepository.GetSingle(x => x.Id == Convert.ToInt32(User.Identity.Name));
+            if (customerAccount.ApplicationUserId != Convert.ToInt32(User.Identity.Name))
+            {
+                return new UnauthorizedResult();
+            }
+            List<CustomerTransaction> result = new List<CustomerTransaction>();
+            if(model.Type == "Debits")
+            {
+                result = _repository
+                .AllIncluding(x => x.CustomerAccount)
+                .Where(x => x.Debit > 0 && x.Created >= model.StartDate && x.Created <= model.EndDate)
+                .OrderBy(c => c.Id)
+                .ToList();
+            }
+            else if (model.Type == "Credits")
+            {
+                result = _repository
+                .AllIncluding(x => x.CustomerAccount)
+                .Where(x => x.Credit > 0 && x.Created >= model.StartDate && x.Created <= model.EndDate)
+                .OrderBy(c => c.Id)
+                .ToList();
+            }
+            else
+            {
+                result = _repository
+                .AllIncluding(x => x.CustomerAccount)
+                .Where(x => x.Created >= model.StartDate && x.Created <= model.EndDate)
+                .OrderBy(c => c.Id)
+                .ToList();
+            }
+
             IEnumerable<CustomerTransactionViewModel> vm = Mapper.Map<IEnumerable<CustomerTransaction>, IEnumerable<CustomerTransactionViewModel>>(result);
             foreach (var item in vm)
             {

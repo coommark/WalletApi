@@ -70,49 +70,24 @@ namespace Wallet.Api.Controllers
             if (result.Succeeded)
             {
                 var userAccount = await _userManager.FindByEmailAsync(model.Email);
-                // Delete when the user must activate their account via email.
                 userAccount.EmailConfirmed = true;
 
-                // Create user role                
                 var findUserRole = await _roleManager.FindByNameAsync("Customer");
                 var userRole = new IdentityRole("Customer");                
 
-                // Add userAccount to a user role
                 if (!await _userManager.IsInRoleAsync(userAccount, userRole.Name))
                 {
                     await _userManager.AddToRoleAsync(userAccount, userRole.Name);
                 }
-
                 return new OkResult();
             }
 
-            // If result is not successful, add error message(s)
             AddErrors(result);
 
             return new BadRequestObjectResult(result.Errors);
         }
 
-        //[HttpPost]
-        //[Route("login")]
-        //public async Task<IActionResult> Login([FromBody]LoginViewModel model)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-
-        //    if (!result.Succeeded)
-        //    {
-        //        ModelState.AddModelError(string.Empty, "Wrong username or password");
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var user = await _userManager.FindByNameAsync(model.Email);
-
-        //    return new OkResult();
-        //}
+        
 
 
 

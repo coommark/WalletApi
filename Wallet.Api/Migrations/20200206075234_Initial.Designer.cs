@@ -11,7 +11,7 @@ using Wallet.Data;
 namespace Wallet.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200205154253_Initial")]
+    [Migration("20200206075234_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
